@@ -26,4 +26,115 @@
     }
     button {
       padding: 10px 15px;
-      font-size
+      font-size: 16px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    #notes-list {
+      margin-top: 20px;
+    }
+    .note-item {
+      background: #f9f9f9;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .note-item:hover {
+      background: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="lock-screen">
+  <h2>Enter Password</h2>
+  <input type="password" id="passwordInput" placeholder="Password">
+  <button onclick="unlock()">Unlock</button>
+  <p id="error" style="color:red;"></p>
+</div>
+
+<div id="notes-app" style="display: none;">
+  <h2>My Notes Library</h2>
+  <input type="text" id="noteTitle" placeholder="Note Title">
+  <textarea id="noteContent" placeholder="Write your note here..."></textarea>
+  <button onclick="saveNote()">Save Note</button>
+  <button onclick="clearEditor()">Clear</button>
+
+  <div id="notes-list">
+    <h3>Saved Notes:</h3>
+    <div id="notesContainer"></div>
+  </div>
+</div>
+
+<script>
+  const correctPassword = "shambhavi<3"; // Change this
+
+  let currentEditingId = null;
+
+  function unlock() {
+    const input = document.getElementById("passwordInput").value;
+    if (input === correctPassword) {
+      document.getElementById("lock-screen").style.display = "none";
+      document.getElementById("notes-app").style.display = "block";
+      loadNotesList();
+    } else {
+      document.getElementById("error").textContent = "Incorrect password.";
+    }
+  }
+
+  function saveNote() {
+    const title = document.getElementById("noteTitle").value.trim();
+    const content = document.getElementById("noteContent").value;
+
+    if (!title) {
+      alert("Please enter a title for the note.");
+      return;
+    }
+
+    const notes = JSON.parse(localStorage.getItem("notesLibrary") || "[]");
+
+    if (currentEditingId !== null) {
+      // Update existing note
+      notes[currentEditingId] = { title, content };
+    } else {
+      // Add new note
+      notes.push({ title, content });
+    }
+
+    localStorage.setItem("notesLibrary", JSON.stringify(notes));
+    clearEditor();
+    loadNotesList();
+  }
+
+  function loadNotesList() {
+    const notes = JSON.parse(localStorage.getItem("notesLibrary") || "[]");
+    const container = document.getElementById("notesContainer");
+    container.innerHTML = "";
+
+    notes.forEach((note, index) => {
+      const div = document.createElement("div");
+      div.className = "note-item";
+      div.textContent = note.title;
+      div.onclick = () => loadNote(index);
+      container.appendChild(div);
+    });
+  }
+
+  function loadNote(index) {
+    const notes = JSON.parse(localStorage.getItem("notesLibrary") || "[]");
+    const note = notes[index];
+    document.getElementById("noteTitle").value = note.title;
+    document.getElementById("noteContent").value = note.content;
+    currentEditingId = index;
+  }
+
+  function clearEditor() {
+    document.getElementById("noteTitle").value = "";
+    document.getElementById("noteContent").value = "";
+    currentEditingId = null;
+  }
+</script>
+
+</body>
+</html>
